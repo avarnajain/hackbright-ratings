@@ -66,7 +66,7 @@ def load_ratings():
     Rating.query.delete()
 
     for row in open("seed_data/u.data"):
-        row = row.rstrip().split("|")
+        row = row.rstrip().split()
 
         user_id = row[0]
         movie_id = row[1]
