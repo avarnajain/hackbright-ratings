@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Some more info</h2> <br>
+
+
+<div>
+ <form action="/new-user-info" method="POST">
+    Age <input type="text" name="age"> <br>
+    Zipcode <input type="text" name="zipcode"> <br>
+    <input type="submit" name="submit">
+ </form>
+</div>
+
+{% endblock %}
