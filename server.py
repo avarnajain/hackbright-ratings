@@ -8,6 +8,8 @@ from flask_debugtoolbar import DebugToolbarExtension
 
 from model import connect_to_db, db, User, Rating, Movie
 
+from sqlalchemy import asc
+
 
 app = Flask(__name__)
 
@@ -31,6 +33,13 @@ def user_list():
 
     users = User.query.all()
     return render_template("user_list.html", users=users)
+
+@app.route("/movies")
+def movie_list():
+    """Show list of users."""
+
+    movies = Movie.query.order_by('title').all()
+    return render_template("movie_list.html", movies=movies)
 
 @app.route('/new-user')
 def new_user():
@@ -59,7 +68,8 @@ def check_user():
         if (db_user.password == new_password):
             session['user_id'] = db_user.user_id
             flash('Succesfully loggged in!')
-            return redirect('/')
+            return_url = '/users/{}'.format(session['user_id'])
+            return redirect(return_url)
         #if not
         else: #option to reset password
             return render_template('user_error.html')
@@ -109,6 +119,55 @@ def logout_user():
     flash("Successfully logged out")
     return redirect('/')
 
+
+@app.route('/users/<user_id>')
+def user_info(user_id):
+
+    user = User.query.get(user_id)
+    list_of_Rating = Rating.query.filter(Rating.user_id==user_id).all()
+    movies =[]
+
+    for rating in list_of_Rating:
+        movie = Movie.query.get(rating.movie_id).title
+        score = rating.score
+        movie_rating = (movie, score)
+        movies.append(movie_rating)
+
+    return render_template('user_info.html',
+                                user=user,
+                                movies=movies)
+
+@app.route('/movies/<movie_id>')
+def movie_info(movie_id):
+
+    movie = Movie.query.get(movie_id)
+    list_of_Rating = Rating.query.filter(Rating.movie_id==movie_id).all()
+    user_ratings = []
+
+    for rating in list_of_Rating:
+        user = User.query.get(rating.user_id).email
+        score = rating.score
+        user_rating = (user, score)
+        user_ratings.append(user_rating)
+
+    return render_template('movie_info.html',
+                                movie=movie,
+                                user_ratings=user_ratings)
+
+@app.route('/rate-movie/<movie_id>', methods=['POST'])
+def rate_movie(movie_id):
+
+    score = request.form.get('rating')
+
+    rating = Rating(movie_id=movie_id, 
+                user_id=session['user_id'],
+                score=score)
+    
+    db.session.add(rating)
+    db.session.commit()
+   
+    redirect_url = '/movies/{}'.format(movie_id)
+    return redirect(redirect_url)
 
 
 if __name__ == "__main__":
