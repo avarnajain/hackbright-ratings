@@ -31,7 +31,7 @@ class User(db.Model):
 # Put your Movie and Rating model classes here.
 
 class Movie(db.Model):
-    """Movie info"""
+    """Movies that are rated"""
 
     __tablename__="movies"
 

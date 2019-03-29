@@ -2,6 +2,7 @@
 {% block content %}
 
 <h2>Successfully Logged In!!</h2>
-<h3>{{email}} </h3>
+<h3>{{session['email']}} </h3>
 
+<a href="/users/{{session['user_id']}}">My profile</a>
 {% endblock %}

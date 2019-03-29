@@ -1,11 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h2>Movie Profile:</h2>
+<h2>{{ movie.title }} </h2>
 
-<h3>Movie </h3>
+
 <ul>    
-    <li>Title: {{ movie.title }}</li>
     <li>Released at: {{ movie.released_at.date() }}</li>
     <li>IMDB: <a href="{{movie.imdb_url}}">click here</a></li>
     <li>ID: {{ movie.movie_id }}</li>
@@ -13,7 +12,8 @@
 
 {% if 'user_id' in session %}
 
-<h3>Please rate this movie</h3>
+
+<h3>Rate this movie</h3>
 <ul>
     <form action="/rate-movie/{{movie.movie_id}}" method="POST">
     <input type="radio" value="1" name="rating">1
@@ -30,7 +30,7 @@
 
 {% endif %}
 
-<h3> User email, Score</h3>
+<h3> Ratings by other users:</h3>
 <ul>
     {% for user in user_ratings %}
     <li>{{ user[0] }}, {{ user[1] }}</li>

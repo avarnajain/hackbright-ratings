@@ -25,6 +25,7 @@ app.jinja_env.undefined = StrictUndefined
 @app.route('/')
 def index():
     """Homepage."""
+
     return render_template('homepage.html')
 
 @app.route("/users")
@@ -36,7 +37,7 @@ def user_list():
 
 @app.route("/movies")
 def movie_list():
-    """Show list of users."""
+    """Show list of movies."""
 
     movies = Movie.query.order_by('title').all()
     return render_template("movie_list.html", movies=movies)
@@ -96,8 +97,9 @@ def new_user_info():
     db.session.add(user)
     db.session.commit()
 
+    session['email'] = user.email
     session['user_id'] = user.user_id
-    return render_template('logged_in.html', email=user.email)
+    return redirect('/logged-in')
 
 @app.route('/login')
 def user_login():
@@ -106,15 +108,15 @@ def user_login():
 
 @app.route('/logged-in')
 def logged_in():
-
+    """Successfully Logged in page"""
     user = User.query.filter(User.user_id==session['user_id']).first()
     user_email = user.email
 
-    return render_template('logged_in.html', email=user_email)
+    return render_template('logged_in.html')
 
 @app.route('/logout')
 def logout_user():
-
+    """Log out route to clear entire session"""
     session.clear()
     flash("Successfully logged out")
     return redirect('/')
@@ -122,7 +124,7 @@ def logout_user():
 
 @app.route('/users/<user_id>')
 def user_info(user_id):
-
+    """Info for specific users"""
     user = User.query.get(user_id)
     list_of_Rating = Rating.query.filter(Rating.user_id==user_id).all()
     movies =[]
@@ -139,7 +141,7 @@ def user_info(user_id):
 
 @app.route('/movies/<movie_id>')
 def movie_info(movie_id):
-
+    """Info for specific movie"""
     movie = Movie.query.get(movie_id)
     list_of_Rating = Rating.query.filter(Rating.movie_id==movie_id).all()
     user_ratings = []
@@ -156,7 +158,7 @@ def movie_info(movie_id):
 
 @app.route('/rate-movie/<movie_id>', methods=['POST'])
 def rate_movie(movie_id):
-
+    """Pos method for adding user rating"""
     score = request.form.get('rating')
 
     rating = Rating(movie_id=movie_id, 
