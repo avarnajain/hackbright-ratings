@@ -1,6 +1,8 @@
 """Models and database functions for Ratings project."""
 
 from flask_sqlalchemy import SQLAlchemy
+import correlation
+
 
 # This is the connection to the PostgreSQL database; we're getting this through
 # the Flask-SQLAlchemy helper library. On this, we can find the `session`
@@ -27,6 +29,41 @@ class User(db.Model):
         """Provide helpful representation when printed."""
 
         return "<User user_id={} email={}>".format(self.user_id, self.email)
+
+    def similarity(self, user2):
+        #all movies and scores given by user
+        user1_ratings = {}
+        common_ratings = []
+
+        #All ratings by user
+        for rating in self.ratings:
+            user1_ratings[rating.movie_id] = rating.score 
+
+        #common movies rated by other user
+        for rating in user2.ratings:
+            user1_score = user1_ratings.get(rating.movie_id)
+            if user1_score:
+                common_ratings.append((user1_score, rating.score))
+
+        if common_ratings:
+            return correlation.pearson(common_ratings)
+        else:
+            return 0.0
+
+    def predict_rating(self, movie):
+        """Predict rating for user for specific movie"""
+
+        other_ratings = movie.ratings
+        other_users = [r.user for r in movie.ratings]
+        similarity_tuple_list = [(self.similarity(o_user), o_user) 
+                                for o_user in other_users]
+        sorted_similarites = sorted(similarity_tuple_list, reverse=True)
+        sim, sim_user = sorted_similarites[0]
+
+        for rating in other_ratings:
+            if rating.user_id == sim_user.user_ud:
+                return rating.score * sim
+
 
 # Put your Movie and Rating model classes here.
 
@@ -71,6 +108,9 @@ class Rating(db.Model):
                                                 self.movie_id,
                                                 self.user_id,
                                                 self.score))
+
+
+
 
 ##############################################################################
 # Helper functions
